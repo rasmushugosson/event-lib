@@ -133,7 +133,6 @@ class LayerStack
   private:
     std::vector<Layer *> m_Layers;
     uint32_t m_LayerInsertIndex = 0; // NOTE: Boundary between layers and overlays
-    EventListener m_Listener;
 };
 
 } // namespace ae

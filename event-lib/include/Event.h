@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <functional>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 namespace ae
@@ -225,23 +226,29 @@ class EventListener
 
   public:
     EventListener();
-    explicit EventListener(std::function<void(Event &)> callback);
     EventListener(const EventListener &) = delete;
     EventListener &operator=(const EventListener &) = delete;
     EventListener(EventListener &&other) noexcept;
     EventListener &operator=(EventListener &&other) noexcept;
     ~EventListener();
 
-    void SetCallback(std::function<void(Event &)> callback);
-
-  private:
-    [[nodiscard]] const std::function<void(Event &)> &GetCallback() const noexcept
+    template <typename T>
+    void Subscribe(std::function<void(T &)> callback)
     {
-        return m_Callback;
+        m_Handlers[EventTypeId<T>::Get()] = [cb = std::move(callback)](Event &e) { cb(static_cast<T &>(e)); };
+    }
+
+    template <typename T>
+    void Unsubscribe()
+    {
+        m_Handlers.erase(EventTypeId<T>::Get());
     }
 
   private:
-    std::function<void(Event &)> m_Callback;
+    void Handle(Event &event);
+
+  private:
+    std::unordered_map<uint32_t, std::function<void(Event &)>> m_Handlers;
 };
 
 // Key Events

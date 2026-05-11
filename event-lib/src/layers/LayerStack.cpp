@@ -6,10 +6,7 @@
 #include <algorithm>
 #include <ranges>
 
-ae::LayerStack::LayerStack()
-{
-    m_Listener.SetCallback([this](Event &event) { OnEvent(event); });
-}
+ae::LayerStack::LayerStack() = default;
 
 ae::LayerStack::~LayerStack()
 {

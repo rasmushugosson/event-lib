@@ -3,21 +3,15 @@
 #include "../internal/events/EventManager.h"
 #include "Event.h"
 
-ae::EventListener::EventListener() : m_Callback(nullptr)
+ae::EventListener::EventListener()
 {
     EventManager::Get().AddListener(this);
 }
 
-ae::EventListener::EventListener(std::function<void(ae::Event &)> callback) : m_Callback(std::move(callback))
-{
-    EventManager::Get().AddListener(this);
-}
-
-ae::EventListener::EventListener(ae::EventListener &&other) noexcept : m_Callback(std::move(other.m_Callback))
+ae::EventListener::EventListener(ae::EventListener &&other) noexcept : m_Handlers(std::move(other.m_Handlers))
 {
     EventManager::Get().RemoveListener(&other);
     EventManager::Get().AddListener(this);
-    other.m_Callback = nullptr;
 }
 
 ae::EventListener &ae::EventListener::operator=(ae::EventListener &&other) noexcept
@@ -25,8 +19,7 @@ ae::EventListener &ae::EventListener::operator=(ae::EventListener &&other) noexc
     if (this != &other)
     {
         EventManager::Get().RemoveListener(&other);
-        m_Callback = std::move(other.m_Callback);
-        other.m_Callback = nullptr;
+        m_Handlers = std::move(other.m_Handlers);
     }
 
     return *this;
@@ -37,7 +30,12 @@ ae::EventListener::~EventListener()
     EventManager::Get().RemoveListener(this);
 }
 
-void ae::EventListener::SetCallback(std::function<void(Event &)> callback)
+void ae::EventListener::Handle(ae::Event &event)
 {
-    m_Callback = std::move(callback);
+    auto it = m_Handlers.find(event.GetTypeId());
+
+    if (it != m_Handlers.end())
+    {
+        it->second(event);
+    }
 }

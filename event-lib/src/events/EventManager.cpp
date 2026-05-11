@@ -49,14 +49,6 @@ void ae::EventManager::DispatchEvent(Event &event) const
 {
     for (EventListener *pListener : m_pListeners)
     {
-        const auto &callback = pListener->GetCallback();
-
-        if (!callback)
-        {
-            continue;
-        }
-
-        event.m_Consumed = false; // NOTE: All listeners get non-consumed event
-        callback(event);
+        pListener->Handle(event);
     }
 }
